@@ -37,3 +37,8 @@ func FetchBytecode(conf *config.Config) {
 	conf.Bytecode = bytecode
 
 }
+
+func QueryEthSignatureDatabase(signatures []string) []string {
+
+	return []string{}
+}
