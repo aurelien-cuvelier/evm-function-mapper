@@ -11,7 +11,7 @@ import (
 type Config struct {
 	Bytecode []byte
 	Rpc      string
-	Address  string
+	Address  common.Address
 }
 
 func GetConfig() *Config {
@@ -72,6 +72,6 @@ func parseFlags(cmd *cobra.Command) (*Config, error) {
 	return &Config{
 		Rpc:      rpc,
 		Bytecode: common.Hex2Bytes(bytecode),
-		Address:  address,
+		Address:  common.HexToAddress(address),
 	}, nil
 }
