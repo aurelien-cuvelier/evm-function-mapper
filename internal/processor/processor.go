@@ -53,25 +53,17 @@ func FindFunctionSignatures(bytecode []byte) []string {
 			continue
 		}
 
+		currentSequence = append(currentSequence, b)
+
 		switch b {
 
-		case dispatcherSequence[0], dispatcherSequence[1],
-			dispatcherSequence[2], dispatcherSequence[3],
-			dispatcherSequence[4]:
+		case dispatcherSequence[1]:
+			reader.Read(lastSignature)
 
-			currentSequence = append(currentSequence, b)
-
-			switch b {
-
-			case dispatcherSequence[1]:
-				reader.Read(lastSignature)
-
-			case dispatcherSequence[3]:
-				//consuming the destination of JUMPI
-				for i := 0; i < 2; i++ {
-					reader.ReadByte()
-				}
-
+		case dispatcherSequence[3]:
+			//consuming the destination of JUMPI
+			for i := 0; i < 2; i++ {
+				reader.ReadByte()
 			}
 
 		}
