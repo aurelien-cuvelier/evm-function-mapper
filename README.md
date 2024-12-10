@@ -2,7 +2,7 @@
 
 A CLI tool for analyzing Ethereum Virtual Machine (EVM) bytecode. This tool extracts function signatures from the bytecode and attempts to decode them using the [4bytes.directory](https://www.4byte.directory/) API.
 
-> Note: This project is experimental and primarily developed for personal use, and is still incomplete and under active development. While it is open-source, no guarantees or warranties are provided. Contributions are welcome, but use it at your own risk.
+**Note:** This project is **experimental** and primarily developed for personal use as part of my journey to learn Go. While it is open-source and functional, there might be areas that can be improved or refined. No guarantees or warranties are provided, use it at your own risk.
 
 ---
 
