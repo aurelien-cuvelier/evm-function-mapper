@@ -17,11 +17,12 @@ import (
 func FetchBytecode(conf *config.Config) {
 
 	client, err := ethclient.DialContext(context.Background(), conf.Rpc)
-
 	if err != nil {
 		fmt.Println("Could not instantiate ethereum client: ", err)
 		os.Exit(1)
 	}
+
+	defer client.Close()
 
 	chainId, err := client.ChainID(context.Background())
 
@@ -71,12 +72,9 @@ func QueryEthSignatureDatabase(signatures []string) ([]string, error) {
 		}
 
 		body, err := io.ReadAll(res.Body)
-
 		if err != nil {
 			return nil, err
 		}
-
-		defer res.Body.Close()
 
 		var marshalledData FourByteApiResponse
 
@@ -88,6 +86,9 @@ func QueryEthSignatureDatabase(signatures []string) ([]string, error) {
 		for _, entry := range marshalledData.Results {
 			fmt.Printf("%s\n\n", entry.TextSignature)
 		}
+
+		res.Body.Close()
+
 	}
 
 	return []string{}, nil
