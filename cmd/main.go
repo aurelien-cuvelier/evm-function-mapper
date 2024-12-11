@@ -19,6 +19,8 @@ func main() {
 
 	foundSignatures := processor.FindFunctionSignatures(conf.Bytecode)
 
+	fmt.Printf("Found %d function signatures:\n", len(foundSignatures))
+	fmt.Println(foundSignatures, "\n")
 	_, err := fetcher.QueryEthSignatureDatabase(foundSignatures)
 
 	if err != nil {

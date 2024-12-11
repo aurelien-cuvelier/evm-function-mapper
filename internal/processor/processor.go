@@ -5,7 +5,6 @@ import (
 	"io"
 	"os"
 
-	"github.com/ethereum/go-ethereum/common"
 	"github.com/ethereum/go-ethereum/core/vm"
 )
 
@@ -15,7 +14,7 @@ func FindFunctionSignatures(bytecode []byte) []string {
 		Pc:         0,
 		Bytecode:   bytecode,
 		Signatures: []string{},
-		JumpDests:  [][2]byte{},
+		JumpDests:  []int{},
 	}
 
 	delimiters := [2]vm.OpCode{vm.CALLDATALOAD, vm.DUP1}
@@ -33,53 +32,27 @@ func FindFunctionSignatures(bytecode []byte) []string {
 
 	}
 
-	//We remove 1 to the program counter not to lose the DUP1 that was consumed above
-	if err := interpreter.AdjustPc(interpreter.Pc - 1); err != nil {
-		fmt.Println(err)
-		os.Exit(1)
-	}
+	//We simulate the pc of our 1st DUP1 -1 to be our 1st JUMPDEST
+	interpreter.JumpDests = append(interpreter.JumpDests, interpreter.Pc-2)
 
 	for {
-		nextBytes, err := interpreter.NextBytes(DISPATCHER_SEQUENCE_LENGTH)
 
-		if err == io.EOF {
+		if len(interpreter.JumpDests) == 0 {
+			//Iterating until we visited all the nodes JUMPDEST
 			break
 		}
 
-		//We will check on DUP1,PUSH4 and PUSH2 to confirm that we are indeed in a dispatcher sequence
-		dup1 := nextBytes[0]
+		jumpDest := interpreter.JumpDests[0]
 
-		if dup1 != byte(vm.DUP1) {
-			break
+		interpreter.JumpDests = interpreter.JumpDests[1:]
+
+		//We add one the the pc to skip the JUMPDEST byte and go straight to the following DUP1
+		if err := interpreter.AdjustPc(jumpDest + 1); err != nil {
+			fmt.Println(err)
+			os.Exit(1)
 		}
 
-		push4 := nextBytes[1]
-
-		if push4 != byte(vm.PUSH4) {
-			break
-		}
-
-		sig := nextBytes[2:6]
-
-		eqOrGt := nextBytes[6]
-
-		push2 := nextBytes[7]
-
-		if push2 != byte(vm.PUSH2) {
-			break
-		}
-
-		var destination = [2]byte{nextBytes[8], nextBytes[9]}
-
-		switch eqOrGt {
-		case byte(vm.EQ):
-			interpreter.Signatures = append(interpreter.Signatures, common.Bytes2Hex(sig))
-		case byte(vm.GT):
-			interpreter.JumpDests = append(interpreter.JumpDests, destination)
-		default:
-			//Went out of dispatcher sequence
-			break
-		}
+		interpreter.ProcessNode()
 
 	}
 
