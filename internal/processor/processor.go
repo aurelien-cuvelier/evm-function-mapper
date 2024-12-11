@@ -9,14 +9,6 @@ import (
 	"github.com/ethereum/go-ethereum/core/vm"
 )
 
-var dispatcherOpcodes = map[byte]bool{
-	vm.DUP1:        true,
-	byte(vm.PUSH4): true,
-	byte(vm.EQ):    true,
-	byte(vm.PUSH2): true,
-	byte(vm.JUMPI): true,
-}
-
 func FindFunctionSignatures(bytecode []byte) []string {
 
 	interpreter := BytecodeInterpreter{
