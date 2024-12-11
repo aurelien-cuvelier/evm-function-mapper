@@ -59,35 +59,47 @@ type FourByteApiResponse struct {
 
 func QueryEthSignatureDatabase(signatures []string) ([]string, error) {
 
+	//Running queries one by one not to spam the API too much
 	for _, signature := range signatures {
 
-		res, err := http.Get(fmt.Sprintf("https://www.4byte.directory/api/v1/signatures/?hex_signature=%s", signature))
+		for {
 
-		if err != nil {
-			return nil, err
+			res, err := http.Get(fmt.Sprintf("https://www.4byte.directory/api/v1/signatures/?hex_signature=%s", signature))
+
+			if err != nil {
+				return nil, err
+			}
+
+			if res.StatusCode == 429 {
+				time.Sleep(time.Second * 3)
+				continue
+			}
+
+			if res.StatusCode != 200 {
+				return nil, errors.New(fmt.Sprintln("Status code: ", res.StatusCode))
+			}
+
+			body, err := io.ReadAll(res.Body)
+			if err != nil {
+				return nil, err
+			}
+
+			var marshalledData FourByteApiResponse
+
+			if err := json.Unmarshal(body, &marshalledData); err != nil {
+				return nil, err
+			}
+
+			fmt.Printf("==================0x%s===================\n", signature)
+			for _, entry := range marshalledData.Results {
+				fmt.Printf("%s\n\n", entry.TextSignature)
+			}
+
+			res.Body.Close()
+
+			break
+
 		}
-
-		if res.StatusCode != 200 {
-			return nil, errors.New(fmt.Sprintln("Status code: ", res.StatusCode))
-		}
-
-		body, err := io.ReadAll(res.Body)
-		if err != nil {
-			return nil, err
-		}
-
-		var marshalledData FourByteApiResponse
-
-		if err := json.Unmarshal(body, &marshalledData); err != nil {
-			return nil, err
-		}
-
-		fmt.Printf("==================0x%s===================\n", signature)
-		for _, entry := range marshalledData.Results {
-			fmt.Printf("%s\n\n", entry.TextSignature)
-		}
-
-		res.Body.Close()
 
 	}
 
