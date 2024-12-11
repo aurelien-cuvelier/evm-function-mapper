@@ -42,6 +42,24 @@ By visiting and analyzing all reachable nodes in the bytecode, the tool ensures 
 
 ---
 
+## Compilation
+
+Compile for Linux, Windows & Mac:
+
+```bash
+make
+```
+
+Compile for a single target:
+
+```bash
+make build-linux
+make build-mac
+make build-windows
+```
+
+---
+
 ## Usage
 
 To run the CLI tool, use the following commands:
